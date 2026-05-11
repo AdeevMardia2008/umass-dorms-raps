@@ -1,0 +1,1045 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>UMass RAP & Dorm Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@300;400;500&display=swap');
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'IBM Plex Sans', sans-serif; background: #f7f6f2; color: #1a1a1a; padding: 2rem 1rem; }
+  .wrap { max-width: 920px; margin: 0 auto; }
+  h1 { font-family: 'IBM Plex Mono', monospace; font-size: 18px; font-weight: 500; margin-bottom: 4px; letter-spacing: -0.5px; }
+  .subtitle { font-size: 13px; color: #666; margin-bottom: 1.2rem; }
+
+  /* KEY BOX */
+  .key-box { background: #fff; border: 1px solid #e5e3dc; border-radius: 8px; padding: 14px 16px; margin-bottom: 1.2rem; }
+  .key-box h3 { font-family: 'IBM Plex Mono', monospace; font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: .06em; margin-bottom: 10px; }
+  .key-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 8px; }
+  .key-item { font-size: 12px; line-height: 1.5; }
+  .key-item strong { font-weight: 500; }
+  .key-item span { color: #666; }
+
+  /* ROOM RANKING TABLE */
+  .room-table-wrap { background: #fff; border: 1px solid #e5e3dc; border-radius: 8px; margin-bottom: 1.4rem; overflow: hidden; }
+  .room-table-head { padding: 12px 16px; border-bottom: 1px solid #e5e3dc; display: flex; align-items: center; gap: 8px; cursor: pointer; user-select: none; }
+  .room-table-head h2 { font-size: 14px; font-weight: 500; flex: 1; }
+  .room-table-body { display: none; overflow-x: auto; }
+  .room-table-body.open { display: block; }
+  .rt { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .rt th { text-align: left; padding: 8px 14px; background: #f7f6f2; font-weight: 500; font-size: 11px; font-family: 'IBM Plex Mono', monospace; color: #888; text-transform: uppercase; letter-spacing: .04em; border-bottom: 1px solid #e5e3dc; white-space: nowrap; }
+  .rt td { padding: 9px 14px; border-bottom: 1px solid #f0ede6; vertical-align: top; line-height: 1.5; }
+  .rt tr:last-child td { border-bottom: none; }
+  .rt tr:hover td { background: #faf9f6; }
+  .stars { color: #d4a017; letter-spacing: 1px; font-size: 13px; }
+  .zroom-badge { display: inline-block; font-size: 10px; font-family: 'IBM Plex Mono', monospace; background: #e8f0de; color: #2d5a0e; border: 1px solid #c2d9a8; padding: 1px 6px; border-radius: 3px; margin-left: 4px; white-space: nowrap; }
+  .ne-badge { display: inline-block; font-size: 10px; font-family: 'IBM Plex Mono', monospace; background: #deedf5; color: #0a4d6e; padding: 1px 6px; border-radius: 3px; margin-left: 4px; white-space: nowrap; }
+  .room-note { font-size: 11px; color: #888; padding: 10px 14px; background: #f7f6f2; border-top: 1px solid #e5e3dc; line-height: 1.6; }
+
+  /* FILTER ROW */
+  .filter-row { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 1rem; }
+  .filter-btn { font-size: 11px; font-family: 'IBM Plex Mono', monospace; padding: 5px 12px; border-radius: 3px; border: 1px solid #ccc; background: transparent; cursor: pointer; color: #555; transition: all 0.15s; }
+  .filter-btn.active, .filter-btn:hover { background: #1a1a1a; color: #f7f6f2; border-color: #1a1a1a; }
+
+  /* RAP CARDS */
+  .rap-card { background: #fff; border: 1px solid #e5e3dc; border-radius: 8px; margin-bottom: 10px; overflow: hidden; transition: box-shadow 0.15s; }
+  .rap-card:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.07); }
+  .rap-card.hidden { display: none; }
+  .card-head { display: grid; grid-template-columns: 1fr auto; align-items: center; padding: 14px 16px; cursor: pointer; gap: 10px; }
+  .card-head-left { display: flex; flex-direction: column; gap: 4px; }
+  .hall-name { font-size: 14px; font-weight: 500; }
+  .rap-name { font-size: 12px; color: #555; }
+  .tags { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
+  .tag { font-size: 10px; font-family: 'IBM Plex Mono', monospace; font-weight: 500; padding: 2px 7px; border-radius: 3px; }
+  .tag-ne { background: #deedf5; color: #0a4d6e; }
+  .tag-sw { background: #e8f0de; color: #2d5a0e; }
+  .tag-gen { background: #f0ede6; color: #6b5a3e; border: 1px solid #ddd5c4; }
+  .tag-cics { background: #ede8f5; color: #4a2d8a; }
+  .tag-zroom { background: #e8f0de; color: #2d5a0e; border: 1px solid #c2d9a8; }
+  .chevron { font-size: 11px; color: #aaa; transition: transform 0.2s; flex-shrink: 0; }
+  .chevron.open { transform: rotate(180deg); }
+  .card-body { display: none; border-top: 1px solid #e5e3dc; }
+  .card-body.open { display: grid; grid-template-columns: 1fr 1fr 1fr; }
+  @media (max-width: 700px) { .card-body.open { grid-template-columns: 1fr; } }
+  @media (min-width: 701px) and (max-width: 900px) { .card-body.open { grid-template-columns: 1fr 1fr; } }
+  .section { padding: 14px 16px; border-right: 1px solid #e5e3dc; }
+  .section:last-child { border-right: none; }
+  .section-title { font-size: 10px; font-family: 'IBM Plex Mono', monospace; font-weight: 500; color: #999; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 10px; }
+  .detail-row { display: flex; gap: 8px; font-size: 12px; padding: 4px 0; border-bottom: 1px solid #f0ede6; align-items: flex-start; }
+  .detail-row:last-child { border-bottom: none; }
+  .detail-label { color: #888; min-width: 80px; flex-shrink: 0; font-size: 11px; }
+  .detail-val { color: #1a1a1a; line-height: 1.5; }
+  .gen-ed-box { background: #f7f6f2; border-radius: 5px; padding: 8px 10px; margin-top: 8px; }
+  .gen-ed-title { font-size: 10px; color: #888; font-family: 'IBM Plex Mono', monospace; margin-bottom: 5px; }
+  .gen-ed-item { font-size: 12px; padding: 3px 0; display: flex; gap: 6px; align-items: center; }
+  .gen-ed-item::before { content: "→"; color: #aaa; font-size: 10px; }
+  .features-list { list-style: none; }
+  .features-list li { font-size: 12px; padding: 3px 0; color: #444; display: flex; gap: 6px; line-height: 1.4; }
+  .features-list li::before { content: "·"; color: #bbb; flex-shrink: 0; }
+  .verdict { background: #fffbf0; border: 1px solid #e8d9a0; border-radius: 5px; padding: 8px 10px; margin-top: 8px; font-size: 12px; color: #5a4500; line-height: 1.5; }
+  .verdict strong { color: #3a2d00; }
+  .comfort-section { padding: 14px 16px; }
+  .comfort-rating { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+  .comfort-stars { font-size: 16px; color: #d4a017; }
+  .comfort-label { font-size: 12px; color: #666; }
+  .comfort-note { font-size: 12px; color: #444; line-height: 1.6; }
+  .quote { font-size: 11px; color: #666; font-style: italic; border-left: 2px solid #e0ddd4; padding-left: 8px; margin-top: 6px; line-height: 1.5; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <h1>UMass Amherst — RAP & Dorm Comfort Guide</h1>
+  <p class="subtitle">All RAPs available to you. Tap any card to expand. Three panels: RAP details, hall features, and room comfort rating.</p>
+
+  <!-- KEY -->
+  <div class="key-box">
+    <h3>Gen Ed key — what each code means</h3>
+    <div class="key-grid">
+      <div class="key-item"><strong>CW</strong> <span>— College Writing (freshman writing)</span></div>
+      <div class="key-item"><strong>R1</strong> <span>— Basic Math (covered by MATH 131)</span></div>
+      <div class="key-item"><strong>R2</strong> <span>— Analytic Reasoning (covered by CS courses)</span></div>
+      <div class="key-item"><strong>BS</strong> <span>— Biological Science (4 credits)</span></div>
+      <div class="key-item"><strong>PS</strong> <span>— Physical Science (4 credits)</span></div>
+      <div class="key-item"><strong>AL/AT</strong> <span>— Arts & Literature / Arts & Theater</span></div>
+      <div class="key-item"><strong>HS</strong> <span>— Historical Studies</span></div>
+      <div class="key-item"><strong>SB</strong> <span>— Social & Behavioral Science</span></div>
+      <div class="key-item"><strong>SI</strong> <span>— Social Interdisciplinary (4th Social World slot)</span></div>
+      <div class="key-item"><strong>DU</strong> <span>— US Diversity (must do first year on campus)</span></div>
+      <div class="key-item"><strong>DG</strong> <span>— Global Diversity (ANTHRO 104 covers this)</span></div>
+      <div class="key-item"><strong>JYW</strong> <span>— Junior Year Writing (CICS 305 covers this)</span></div>
+      <div class="key-item"><strong>IE</strong> <span>— Integrative Experience (CS 320/326 covers this)</span></div>
+    </div>
+  </div>
+
+  <!-- ROOM COMFORT RANKING TABLE -->
+  <div class="room-table-wrap">
+    <div class="room-table-head" onclick="toggleTable(this)">
+      <h2>Room size & comfort ranking — all RAP halls compared</h2>
+      <span class="chevron open">▼</span>
+    </div>
+    <div class="room-table-body open">
+      <table class="rt">
+        <tr>
+          <th>Hall</th>
+          <th>Area</th>
+          <th>Room types</th>
+          <th>Comfort rating</th>
+          <th>Key facts</th>
+        </tr>
+        <tr>
+          <td><strong>Kennedy</strong></td>
+          <td>Southwest</td>
+          <td>Single, Double, <span class="zroom-badge">Z-Room</span></td>
+          <td><span class="stars">★★★★★</span></td>
+          <td>Z-rooms are massive — like living in a single. Tower views. Very loud Thu–Sat nights. Singles described as "wicked spacious."</td>
+        </tr>
+        <tr>
+          <td><strong>Melville</strong></td>
+          <td>Southwest</td>
+          <td>Single, Double, Triple, <span class="zroom-badge">Z-Room</span></td>
+          <td><span class="stars">★★★★★</span></td>
+          <td>Z-rooms + low-rise building = best of both worlds. Quieter than towers, still gets the space. Sweet spot for comfort.</td>
+        </tr>
+        <tr>
+          <td><strong>Thoreau</strong></td>
+          <td>Southwest</td>
+          <td>Single, Double, Triple, <span class="zroom-badge">Z-Room</span></td>
+          <td><span class="stars">★★★★★</span></td>
+          <td>Same as Melville — clustered together, identical room quality and Z-room layout. Quieter low-rise.</td>
+        </tr>
+        <tr>
+          <td><strong>James</strong></td>
+          <td>Southwest</td>
+          <td>Single, Double, Triple, <span class="zroom-badge">Z-Room</span></td>
+          <td><span class="stars">★★★★½</span></td>
+          <td>Z-rooms available. Optional break housing — useful if staying over holidays. Same quality as Thoreau/Melville.</td>
+        </tr>
+        <tr>
+          <td><strong>Emerson</strong></td>
+          <td>Southwest</td>
+          <td>Single, Double, Triple, <span class="zroom-badge">Z-Room</span></td>
+          <td><span class="stars">★★★★½</span></td>
+          <td>Z-rooms available. Similar to James. All four North-SW halls (Kennedy, Thoreau, James, Emerson) share the Z-room benefit.</td>
+        </tr>
+        <tr>
+          <td><strong>Cance</strong></td>
+          <td>Southwest</td>
+          <td>Double only</td>
+          <td><span class="stars">★★★½</span></td>
+          <td>Standard doubles, no Z-rooms, no singles. Decent size but nothing special. Low-rise, very social.</td>
+        </tr>
+        <tr>
+          <td><strong>Leach</strong></td>
+          <td>Northeast</td>
+          <td>Single, Double <span class="ne-badge">Northeast</span></td>
+          <td><span class="stars">★★★</span></td>
+          <td>Mixed reviews. Some say larger rooms than other NE halls + private showers. Others report poor lighting, outdated building, cramped feel. Old building, low ceilings, steam radiators.</td>
+        </tr>
+        <tr>
+          <td><strong>Knowlton</strong></td>
+          <td>Northeast</td>
+          <td>Single, Double, Triple <span class="ne-badge">Northeast</span></td>
+          <td><span class="stars">★★★</span></td>
+          <td>Standard NE double ~187 sq ft. Old building. Has elevator (rare for NE). Low ceilings, old heating system.</td>
+        </tr>
+        <tr>
+          <td><strong>Mary Lyon</strong></td>
+          <td>Northeast</td>
+          <td>Double only <span class="ne-badge">Northeast</span></td>
+          <td><span class="stars">★★½</span></td>
+          <td>Doubles only — no singles, no Z-rooms. Standard NE sizing. Oldest feeling of the NE cluster. Has a built-in seminar room which is unique.</td>
+        </tr>
+        <tr>
+          <td><strong>Moore</strong></td>
+          <td>Southwest</td>
+          <td>Double, Triple only</td>
+          <td><span class="stars">★★★</span></td>
+          <td>No singles, no Z-rooms. Standard doubles/triples. Functional but not spacious.</td>
+        </tr>
+        <tr>
+          <td><strong>Pierpont</strong></td>
+          <td>Southwest</td>
+          <td>Double, Triple only</td>
+          <td><span class="stars">★★★</span></td>
+          <td>Same as Moore — clustered together, identical layout. No Z-rooms, doubles and triples only.</td>
+        </tr>
+      </table>
+      <div class="room-note">
+        <strong>What is a Z-room?</strong> A Z-room splits a traditional double into two connected sections, giving you and your roommate significantly more privacy and personal space — students describe it as "like living in a single." Only available in select Southwest halls. <strong>Northeast halls</strong> are older buildings with steam radiators, low ceilings (~7ft), and standard-sized doubles (~187 sq ft). No Z-rooms exist in Northeast. Floor plans require UMass login at umass.edu/living.
+      </div>
+    </div>
+  </div>
+
+  <!-- FILTERS -->
+  <div class="filter-row">
+    <button class="filter-btn active" onclick="filter('all', this)">All RAPs</button>
+    <button class="filter-btn" onclick="filter('northeast', this)">Northeast only</button>
+    <button class="filter-btn" onclick="filter('southwest', this)">Southwest only</button>
+    <button class="filter-btn" onclick="filter('cics', this)">CICS-specific</button>
+    <button class="filter-btn" onclick="filter('du', this)">Covers DU</button>
+    <button class="filter-btn" onclick="filter('dg', this)">Covers DG</button>
+    <button class="filter-btn" onclick="filter('hs', this)">Covers HS</button>
+    <button class="filter-btn" onclick="filter('zroom', this)">Has Z-rooms</button>
+  </div>
+
+  <!-- LEACH -->
+  <div class="rap-card" data-area="northeast" data-gen="si" data-cics="true">
+    <div class="card-head" onclick="toggle(this)">
+      <div class="card-head-left">
+        <span class="hall-name">Leach Hall</span>
+        <span class="rap-name">PIT — Public Interest Technology RAP</span>
+        <div class="tags">
+          <span class="tag tag-ne">Northeast</span>
+          <span class="tag tag-cics">CICS RAP</span>
+          <span class="tag tag-gen">SI gen ed</span>
+        </div>
+      </div>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="card-body">
+      <div class="section">
+        <div class="section-title">RAP details</div>
+        <div class="detail-row"><span class="detail-label">Course</span><span class="detail-val">CICS 127 — Intro to Public Interest Technology (4 credits)</span></div>
+        <div class="detail-row"><span class="detail-label">Open to</span><span class="detail-val">Any first-year, any major</span></div>
+        <div class="detail-row"><span class="detail-label">Roommate</span><span class="detail-val">Not restricted</span></div>
+        <div class="detail-row"><span class="detail-label">Cluster</span><span class="detail-val">Hamlin + Dwight + Leach</span></div>
+        <div class="detail-row"><span class="detail-label">Dining</span><span class="detail-val">Worcester DC nearby (one of the best)</span></div>
+        <div class="gen-ed-box">
+          <div class="gen-ed-title">Gen Ed satisfied</div>
+          <div class="gen-ed-item">SI — Social Interdisciplinary (4th Social World slot)</div>
+        </div>
+        <div class="verdict"><strong>Best overall for you.</strong> Only CICS RAP with 4-credit course. SI covers your 4th Social World gen ed. Course content (tech ethics, responsible AI, social impact) is directly relevant to CS. Mix of majors = broader network.</div>
+      </div>
+      <div class="section">
+        <div class="section-title">Hall features</div>
+        <ul class="features-list">
+          <li>Co-ed RFYE hall in Northeast</li>
+          <li>Community study lounge</li>
+          <li>TV lounge</li>
+          <li>Kitchen</li>
+          <li>Recreation room — pool table and foosball</li>
+          <li>Laundry and vending</li>
+          <li>Mailing: 21 Eastman Lane, Amherst MA 01003</li>
+          <li>Service desk: Crabtree, 413-545-7595</li>
+        </ul>
+      </div>
+      <div class="comfort-section">
+        <div class="section-title">Room comfort</div>
+        <div class="comfort-rating">
+          <span class="comfort-stars">★★★</span>
+          <span class="comfort-label">3 / 5</span>
+        </div>
+        <div class="comfort-note">Mixed reviews. Some residents say rooms are larger than other NE halls with private showers. Others report outdated building, poor lighting, cramped feel, and dirty communal kitchens. Room types: Singles and Doubles only — no Z-rooms. Northeast buildings have low ceilings (~7ft) and old steam radiators.</div>
+        <div class="quote">"It has some of the larger rooms on campus, clean and private showers/bathroom, and it's in a beautiful area." — RateMyDorm</div>
+        <div class="quote">"The building is outdated and dilapidated, with inadequate lighting and small cramped spaces." — RateMyDorm</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KNOWLTON -->
+  <div class="rap-card" data-area="northeast" data-gen="sb">
+    <div class="card-head" onclick="toggle(this)">
+      <div class="card-head-left">
+        <span class="hall-name">Knowlton Hall</span>
+        <span class="rap-name">Intro to Philosophy — Problems in Social Thought</span>
+        <div class="tags">
+          <span class="tag tag-ne">Northeast</span>
+          <span class="tag tag-gen">SB gen ed</span>
+        </div>
+      </div>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="card-body">
+      <div class="section">
+        <div class="section-title">RAP details</div>
+        <div class="detail-row"><span class="detail-label">Course</span><span class="detail-val">PHIL 170 — Problems in Social Thought (3–4 credits)</span></div>
+        <div class="detail-row"><span class="detail-label">Open to</span><span class="detail-val">Any first-year</span></div>
+        <div class="detail-row"><span class="detail-label">Roommate</span><span class="detail-val">Not restricted</span></div>
+        <div class="detail-row"><span class="detail-label">Cluster</span><span class="detail-val">Crabtree + Mary Lyon + Knowlton</span></div>
+        <div class="detail-row"><span class="detail-label">Dining</span><span class="detail-val">Worcester DC nearby</span></div>
+        <div class="gen-ed-box">
+          <div class="gen-ed-title">Gen Ed satisfied</div>
+          <div class="gen-ed-item">SB — Social & Behavioral Science</div>
+        </div>
+        <div class="verdict">SB only — already covered by your ANTHRO 104 Jump In. Least efficient RAP for you. Only pick this if philosophy genuinely interests you.</div>
+      </div>
+      <div class="section">
+        <div class="section-title">Hall features</div>
+        <ul class="features-list">
+          <li>Co-ed RFYE hall in Northeast</li>
+          <li>Gender-inclusive bathroom with shower</li>
+          <li>Community study lounge / TV room</li>
+          <li>Recreation room — pool table</li>
+          <li>Lounge on first floor</li>
+          <li>Kitchen</li>
+          <li>Laundry and vending machines</li>
+          <li>Elevator — one of few NE halls with one</li>
+          <li>Mailing: 691 North Pleasant St, Amherst MA 01003</li>
+          <li>Service desk: Crabtree, 413-545-7595</li>
+        </ul>
+      </div>
+      <div class="comfort-section">
+        <div class="section-title">Room comfort</div>
+        <div class="comfort-rating">
+          <span class="comfort-stars">★★★</span>
+          <span class="comfort-label">3 / 5</span>
+        </div>
+        <div class="comfort-note">Standard Northeast double (~187 sq ft). Old building with steam radiators and low ceilings. Has an elevator which is rare and convenient. No Z-rooms. Singles and doubles available. Not the most spacious but functional. Gender-inclusive bathroom is a standout feature.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MARY LYON -->
+  <div class="rap-card" data-area="northeast" data-gen="sb du" data-du="true">
+    <div class="card-head" onclick="toggle(this)">
+      <div class="card-head-left">
+        <span class="hall-name">Mary Lyon Hall</span>
+        <span class="rap-name">Education and Film</span>
+        <div class="tags">
+          <span class="tag tag-ne">Northeast</span>
+          <span class="tag tag-gen">SB gen ed</span>
+          <span class="tag tag-gen">DU gen ed</span>
+        </div>
+      </div>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="card-body">
+      <div class="section">
+        <div class="section-title">RAP details</div>
+        <div class="detail-row"><span class="detail-label">Course</span><span class="detail-val">EDUC 167 — Education and Film (4 credits)</span></div>
+        <div class="detail-row"><span class="detail-label">Open to</span><span class="detail-val">Any first-year</span></div>
+        <div class="detail-row"><span class="detail-label">Roommate</span><span class="detail-val">Not restricted</span></div>
+        <div class="detail-row"><span class="detail-label">Cluster</span><span class="detail-val">Crabtree + Mary Lyon + Knowlton</span></div>
+        <div class="detail-row"><span class="detail-label">Dining</span><span class="detail-val">Worcester DC nearby</span></div>
+        <div class="gen-ed-box">
+          <div class="gen-ed-title">Gen Ed satisfied</div>
+          <div class="gen-ed-item">SB — Social & Behavioral Science</div>
+          <div class="gen-ed-item">DU — US Diversity (first year requirement)</div>
+        </div>
+        <div class="verdict"><strong>Strong Northeast pick.</strong> Kills SB + DU in one course. DU must be done first year — this handles it automatically. Best gen ed efficiency in Northeast for you.</div>
+      </div>
+      <div class="section">
+        <div class="section-title">Hall features</div>
+        <ul class="features-list">
+          <li>Co-ed RFYE hall in Northeast</li>
+          <li>Dedicated classroom / seminar room in the building</li>
+          <li>Large lounge — TV, pool table, foosball</li>
+          <li>Kitchen with stovetop and convection oven</li>
+          <li>Laundry and vending</li>
+          <li>Mailing: 43 Eastman Lane, Amherst MA 01003</li>
+          <li>Service desk: Crabtree, 413-545-7595</li>
+        </ul>
+      </div>
+      <div class="comfort-section">
+        <div class="section-title">Room comfort</div>
+        <div class="comfort-rating">
+          <span class="comfort-stars">★★½</span>
+          <span class="comfort-label">2.5 / 5</span>
+        </div>
+        <div class="comfort-note">Doubles only — no singles, no Z-rooms. Weakest room situation of the three Northeast RAP halls. Standard NE sizing (~187 sq ft for a double). Old building. The built-in seminar room is a nice perk but doesn't change the bedroom situation. Northeast cons apply: old radiators, low ceilings.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CANCE -->
+  <div class="rap-card" data-area="southwest" data-gen="sb">
+    <div class="card-head" onclick="toggle(this)">
+      <div class="card-head-left">
+        <span class="hall-name">Cance Hall</span>
+        <span class="rap-name">Great Challenges in Public Health / Healthcare for All</span>
+        <div class="tags">
+          <span class="tag tag-sw">Southwest</span>
+          <span class="tag tag-gen">SB gen ed</span>
+        </div>
+      </div>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="card-body">
+      <div class="section">
+        <div class="section-title">RAP details</div>
+        <div class="detail-row"><span class="detail-label">Course</span><span class="detail-val">PUBHLTH 160 — Healthcare for All (3–4 credits)</span></div>
+        <div class="detail-row"><span class="detail-label">Open to</span><span class="detail-val">Any first-year</span></div>
+        <div class="detail-row"><span class="detail-label">Roommate</span><span class="detail-val">Not restricted</span></div>
+        <div class="detail-row"><span class="detail-label">Dining</span><span class="detail-val">Berkshire DC right next door</span></div>
+        <div class="gen-ed-box">
+          <div class="gen-ed-title">Gen Ed satisfied</div>
+          <div class="gen-ed-item">SB — Social & Behavioral Science</div>
+        </div>
+        <div class="verdict">SB only — already covered by ANTHRO 104. Low gen ed value for you. Only pick if public health is your interest.</div>
+      </div>
+      <div class="section">
+        <div class="section-title">Hall features</div>
+        <ul class="features-list">
+          <li>RFYE low-rise hall in Southwest</li>
+          <li>Clustered with Pierpont and Moore (South-SW area)</li>
+          <li>Berkshire DC right next to building</li>
+          <li>Very social — nicknamed "No Pants Cance" by students</li>
+        </ul>
+      </div>
+      <div class="comfort-section">
+        <div class="section-title">Room comfort</div>
+        <div class="comfort-rating">
+          <span class="comfort-stars">★★★½</span>
+          <span class="comfort-label">3.5 / 5</span>
+        </div>
+        <div class="comfort-note">Doubles only, no Z-rooms, no singles. Standard Southwest low-rise room. Newer than Northeast buildings so better maintained, no radiator issues or low ceilings. Decent size but not in the same league as Z-room halls. Building systems are more modern than NE.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMERSON PSYCH -->
+  <div class="rap-card" data-area="southwest" data-gen="sb" data-zroom="true">
+    <div class="card-head" onclick="toggle(this)">
+      <div class="card-head-left">
+        <span class="hall-name">Emerson Hall</span>
+        <span class="rap-name">Introductory Psychology</span>
+        <div class="tags">
+          <span class="tag tag-sw">Southwest</span>
+          <span class="tag tag-gen">SB gen ed</span>
+          <span class="tag tag-zroom">Z-Rooms available</span>
+        </div>
+      </div>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="card-body">
+      <div class="section">
+        <div class="section-title">RAP details</div>
+        <div class="detail-row"><span class="detail-label">Course</span><span class="detail-val">PSYCH 100 — Introductory Psychology (4 credits)</span></div>
+        <div class="detail-row"><span class="detail-label">Open to</span><span class="detail-val">Any first-year</span></div>
+        <div class="detail-row"><span class="detail-label">Roommate</span><span class="detail-val">Not restricted</span></div>
+        <div class="detail-row"><span class="detail-label">Dining</span><span class="detail-val">Hampshire DC very close</span></div>
+        <div class="gen-ed-box">
+          <div class="gen-ed-title">Gen Ed satisfied</div>
+          <div class="gen-ed-item">SB — Social & Behavioral Science</div>
+        </div>
+        <div class="verdict">SB only — already covered by ANTHRO 104. Low gen ed value. Pick only if you want Southwest + Z-room comfort + don't mind the overlap.</div>
+      </div>
+      <div class="section">
+        <div class="section-title">Hall features</div>
+        <ul class="features-list">
+          <li>RFYE low-rise hall in North-Southwest</li>
+          <li>Z-rooms available — very spacious</li>
+          <li>Hampshire DC steps away</li>
+          <li>Very social, high-energy area</li>
+        </ul>
+      </div>
+      <div class="comfort-section">
+        <div class="section-title">Room comfort</div>
+        <div class="comfort-rating">
+          <span class="comfort-stars">★★★★½</span>
+          <span class="comfort-label">4.5 / 5</span>
+        </div>
+        <div class="comfort-note">Z-rooms available — massively spacious for a double. Singles, doubles, triples, and Z-rooms all available. Newer building than Northeast, better maintained. Z-rooms described as "like living in a single." One of the most comfortable low-rise options on campus purely on room size.</div>
+        <div class="quote">"Kennedy, Thoreau, James, and Emerson all have z-rooms which hold so much space it's unbelievable. It is like living in a single." — Society19</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EMERSON SUSTAINABLE -->
+  <div class="rap-card" data-area="southwest" data-gen="si sb" data-zroom="true">
+    <div class="card-head" onclick="toggle(this)">
+      <div class="card-head-left">
+        <span class="hall-name">Emerson Hall</span>
+        <span class="rap-name">Sustainable Living</span>
+        <div class="tags">
+          <span class="tag tag-sw">Southwest</span>
+          <span class="tag tag-gen">SI/SB gen ed</span>
+          <span class="tag tag-zroom">Z-Rooms available</span>
+        </div>
+      </div>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="card-body">
+      <div class="section">
+        <div class="section-title">RAP details</div>
+        <div class="detail-row"><span class="detail-label">Course</span><span class="detail-val">SUSTAINBL 111 — Sustainable Living (credits TBC)</span></div>
+        <div class="detail-row"><span class="detail-label">Open to</span><span class="detail-val">Any first-year</span></div>
+        <div class="detail-row"><span class="detail-label">Roommate</span><span class="detail-val">Not restricted</span></div>
+        <div class="detail-row"><span class="detail-label">Dining</span><span class="detail-val">Hampshire DC steps away</span></div>
+        <div class="gen-ed-box">
+          <div class="gen-ed-title">Gen Ed satisfied</div>
+          <div class="gen-ed-item">Likely SI or SB — verify exact designation on SPIRE</div>
+        </div>
+        <div class="verdict">Medium value. If SI-tagged, covers your 4th Social World slot. Verify on SPIRE before committing.</div>
+      </div>
+      <div class="section">
+        <div class="section-title">Hall features</div>
+        <ul class="features-list">
+          <li>RFYE low-rise in North-Southwest</li>
+          <li>Z-rooms available</li>
+          <li>Hampshire DC steps away</li>
+          <li>Very social area</li>
+        </ul>
+      </div>
+      <div class="comfort-section">
+        <div class="section-title">Room comfort</div>
+        <div class="comfort-rating">
+          <span class="comfort-stars">★★★★½</span>
+          <span class="comfort-label">4.5 / 5</span>
+        </div>
+        <div class="comfort-note">Same building as PSYCH 100 RAP — same Z-room availability and comfort. Identical room situation. Very spacious if you get a Z-room. Newer and better maintained than Northeast halls.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KENNEDY MEDICAL ETHICS -->
+  <div class="rap-card" data-area="southwest" data-gen="at sb" data-zroom="true">
+    <div class="card-head" onclick="toggle(this)">
+      <div class="card-head-left">
+        <span class="hall-name">Kennedy Hall</span>
+        <span class="rap-name">Medical Ethics</span>
+        <div class="tags">
+          <span class="tag tag-sw">Southwest</span>
+          <span class="tag tag-gen">AT gen ed</span>
+          <span class="tag tag-zroom">Z-Rooms available</span>
+        </div>
+      </div>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="card-body">
+      <div class="section">
+        <div class="section-title">RAP details</div>
+        <div class="detail-row"><span class="detail-label">Course</span><span class="detail-val">PHIL 164 — Medical Ethics (4 credits)</span></div>
+        <div class="detail-row"><span class="detail-label">Open to</span><span class="detail-val">Any first-year</span></div>
+        <div class="detail-row"><span class="detail-label">Roommate</span><span class="detail-val">Not restricted</span></div>
+        <div class="detail-row"><span class="detail-label">Dining</span><span class="detail-val">Hampshire DC very close</span></div>
+        <div class="gen-ed-box">
+          <div class="gen-ed-title">Gen Ed satisfied</div>
+          <div class="gen-ed-item">AT — Arts & Theater (Philosophy)</div>
+        </div>
+        <div class="verdict"><strong>Good pick.</strong> AT is still open on your ARR after ANTHRO 104. Tech ethics is relevant for CS. Z-rooms in Kennedy are the biggest on campus. Cons: very loud in the tower Thu–Sat.</div>
+      </div>
+      <div class="section">
+        <div class="section-title">Hall features</div>
+        <ul class="features-list">
+          <li>RFYE tower hall in North-Southwest</li>
+          <li>Z-rooms and singles available</li>
+          <li>Hampshire DC very close</li>
+          <li>High-rise — great views from upper floors</li>
+          <li>Very social — all-freshman tower</li>
+        </ul>
+      </div>
+      <div class="comfort-section">
+        <div class="section-title">Room comfort</div>
+        <div class="comfort-rating">
+          <span class="comfort-stars">★★★★★</span>
+          <span class="comfort-label">5 / 5 (room size)</span>
+        </div>
+        <div class="comfort-note">Best room size on campus if you get a Z-room or single. Singles described as "wicked spacious." Tower means high floor options with great views. Communal bathrooms cleaned daily but can get rough on weekend mornings. Noise is the main tradeoff — very loud nights Thu–Sat.</div>
+        <div class="quote">"Single dorm was amazing and wicked spacious. Bathrooms were ok and were cleaned daily." — RateMyDorm</div>
+        <div class="quote">"Kennedy is probably the ultimate freshman experience — its loud and obnoxious but you will have a good time." — RateMyDorm</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- KENNEDY KIN -->
+  <div class="rap-card" data-area="southwest" data-gen="bs" data-zroom="true">
+    <div class="card-head" onclick="toggle(this)">
+      <div class="card-head-left">
+        <span class="hall-name">Kennedy Hall</span>
+        <span class="rap-name">Intro to Kinesiology</span>
+        <div class="tags">
+          <span class="tag tag-sw">Southwest</span>
+          <span class="tag tag-gen">BS gen ed</span>
+          <span class="tag tag-zroom">Z-Rooms available</span>
+        </div>
+      </div>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="card-body">
+      <div class="section">
+        <div class="section-title">RAP details</div>
+        <div class="detail-row"><span class="detail-label">Course</span><span class="detail-val">KIN 100 — Introduction to Kinesiology (3–4 credits)</span></div>
+        <div class="detail-row"><span class="detail-label">Open to</span><span class="detail-val">Any first-year</span></div>
+        <div class="detail-row"><span class="detail-label">Roommate</span><span class="detail-val">Not restricted</span></div>
+        <div class="detail-row"><span class="detail-label">Dining</span><span class="detail-val">Hampshire DC very close</span></div>
+        <div class="gen-ed-box">
+          <div class="gen-ed-title">Gen Ed satisfied</div>
+          <div class="gen-ed-item">BS — Biological Science</div>
+        </div>
+        <div class="verdict">BS gen ed — but does NOT count as CS lab science (no lab). You'd still need two separate lab science courses later. Same building as Medical Ethics RAP. Low gen ed efficiency but great room.</div>
+      </div>
+      <div class="section">
+        <div class="section-title">Hall features</div>
+        <ul class="features-list">
+          <li>RFYE tower hall in North-Southwest</li>
+          <li>Z-rooms and singles available</li>
+          <li>Hampshire DC very close</li>
+          <li>High-rise — great views</li>
+        </ul>
+      </div>
+      <div class="comfort-section">
+        <div class="section-title">Room comfort</div>
+        <div class="comfort-rating">
+          <span class="comfort-stars">★★★★★</span>
+          <span class="comfort-label">5 / 5 (room size)</span>
+        </div>
+        <div class="comfort-note">Same building as Medical Ethics RAP — identical room situation. Z-rooms and spacious singles. Best room size on campus. Same noise tradeoff on weekends.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MELVILLE -->
+  <div class="rap-card" data-area="southwest" data-gen="sb du" data-du="true" data-zroom="true">
+    <div class="card-head" onclick="toggle(this)">
+      <div class="card-head-left">
+        <span class="hall-name">Melville Hall</span>
+        <span class="rap-name">Introduction to Legal Studies</span>
+        <div class="tags">
+          <span class="tag tag-sw">Southwest</span>
+          <span class="tag tag-gen">SB gen ed</span>
+          <span class="tag tag-gen">DU gen ed</span>
+          <span class="tag tag-zroom">Z-Rooms available</span>
+        </div>
+      </div>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="card-body">
+      <div class="section">
+        <div class="section-title">RAP details</div>
+        <div class="detail-row"><span class="detail-label">Course</span><span class="detail-val">LEGAL 250 — Introduction to Legal Studies (3 credits)</span></div>
+        <div class="detail-row"><span class="detail-label">Open to</span><span class="detail-val">Any first-year</span></div>
+        <div class="detail-row"><span class="detail-label">Roommate</span><span class="detail-val">Not restricted</span></div>
+        <div class="detail-row"><span class="detail-label">Dining</span><span class="detail-val">Berkshire and Hampshire DC both close</span></div>
+        <div class="gen-ed-box">
+          <div class="gen-ed-title">Gen Ed satisfied</div>
+          <div class="gen-ed-item">SB — Social & Behavioral Science</div>
+          <div class="gen-ed-item">DU — US Diversity (first year requirement)</div>
+        </div>
+        <div class="verdict"><strong>Best Southwest pick overall.</strong> Kills SB + DU. DU still open after ANTHRO 104. Z-rooms available. Low-rise = quieter than Kennedy tower. Law + tech is genuinely interesting for CS students.</div>
+      </div>
+      <div class="section">
+        <div class="section-title">Hall features</div>
+        <ul class="features-list">
+          <li>RFYE low-rise in Southwest</li>
+          <li>Z-rooms, singles, doubles, triples available</li>
+          <li>Clustered with Thoreau Hall</li>
+          <li>Berkshire and Hampshire DC both close</li>
+          <li>Quieter than towers</li>
+        </ul>
+      </div>
+      <div class="comfort-section">
+        <div class="section-title">Room comfort</div>
+        <div class="comfort-rating">
+          <span class="comfort-stars">★★★★★</span>
+          <span class="comfort-label">5 / 5</span>
+        </div>
+        <div class="comfort-note">Z-rooms available — same spacious layout as Kennedy but in a quieter low-rise. Singles also available. Best combination of room size + livability. Newer building than Northeast. No radiator issues. Better sleep environment than towers. This is the sweet spot: maximum room size without maximum noise.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MOORE -->
+  <div class="rap-card" data-area="southwest" data-gen="sb dg" data-dg="true">
+    <div class="card-head" onclick="toggle(this)">
+      <div class="card-head-left">
+        <span class="hall-name">Moore Hall</span>
+        <span class="rap-name">Hunger in a Global Economy</span>
+        <div class="tags">
+          <span class="tag tag-sw">Southwest</span>
+          <span class="tag tag-gen">SB gen ed</span>
+          <span class="tag tag-gen">DG gen ed</span>
+        </div>
+      </div>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="card-body">
+      <div class="section">
+        <div class="section-title">RAP details</div>
+        <div class="detail-row"><span class="detail-label">Course</span><span class="detail-val">RESECON 121 — Hunger in a Global Economy (3 credits)</span></div>
+        <div class="detail-row"><span class="detail-label">Open to</span><span class="detail-val">Any first-year</span></div>
+        <div class="detail-row"><span class="detail-label">Roommate</span><span class="detail-val">Not restricted</span></div>
+        <div class="detail-row"><span class="detail-label">Dining</span><span class="detail-val">Berkshire DC right next door</span></div>
+        <div class="gen-ed-box">
+          <div class="gen-ed-title">Gen Ed satisfied</div>
+          <div class="gen-ed-item">SB — Social & Behavioral Science</div>
+          <div class="gen-ed-item">DG — Global Diversity</div>
+        </div>
+        <div class="verdict">SB + DG — both already covered by ANTHRO 104. Duplicate. Low value for you specifically.</div>
+      </div>
+      <div class="section">
+        <div class="section-title">Hall features</div>
+        <ul class="features-list">
+          <li>RFYE low-rise in South-Southwest</li>
+          <li>Clustered with Pierpont Hall</li>
+          <li>Berkshire DC right next door</li>
+        </ul>
+      </div>
+      <div class="comfort-section">
+        <div class="section-title">Room comfort</div>
+        <div class="comfort-rating">
+          <span class="comfort-stars">★★★</span>
+          <span class="comfort-label">3 / 5</span>
+        </div>
+        <div class="comfort-note">Doubles and triples only — no singles, no Z-rooms. Standard Southwest low-rise rooms. Decent, functional, better than Northeast in terms of building age. But significantly smaller feel than Z-room halls. Not a great comfort pick.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIERPONT WORLD POLITICS -->
+  <div class="rap-card" data-area="southwest" data-gen="sb dg" data-dg="true">
+    <div class="card-head" onclick="toggle(this)">
+      <div class="card-head-left">
+        <span class="hall-name">Pierpont Hall</span>
+        <span class="rap-name">World Politics</span>
+        <div class="tags">
+          <span class="tag tag-sw">Southwest</span>
+          <span class="tag tag-gen">SB gen ed</span>
+          <span class="tag tag-gen">DG gen ed</span>
+        </div>
+      </div>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="card-body">
+      <div class="section">
+        <div class="section-title">RAP details</div>
+        <div class="detail-row"><span class="detail-label">Course</span><span class="detail-val">POLISCI 121 — World Politics (3 credits)</span></div>
+        <div class="detail-row"><span class="detail-label">Open to</span><span class="detail-val">Any first-year</span></div>
+        <div class="detail-row"><span class="detail-label">Roommate</span><span class="detail-val">Not restricted</span></div>
+        <div class="detail-row"><span class="detail-label">Dining</span><span class="detail-val">Berkshire DC close</span></div>
+        <div class="gen-ed-box">
+          <div class="gen-ed-title">Gen Ed satisfied</div>
+          <div class="gen-ed-item">SB — Social & Behavioral Science</div>
+          <div class="gen-ed-item">DG — Global Diversity</div>
+        </div>
+        <div class="verdict">SB + DG — both already covered by ANTHRO 104. Same duplication as Moore. Low value for you.</div>
+      </div>
+      <div class="section">
+        <div class="section-title">Hall features</div>
+        <ul class="features-list">
+          <li>RFYE low-rise in South-Southwest</li>
+          <li>Clustered with Moore Hall</li>
+          <li>Berkshire DC close</li>
+        </ul>
+      </div>
+      <div class="comfort-section">
+        <div class="section-title">Room comfort</div>
+        <div class="comfort-rating">
+          <span class="comfort-stars">★★★</span>
+          <span class="comfort-label">3 / 5</span>
+        </div>
+        <div class="comfort-note">Doubles and triples only — no singles, no Z-rooms. Same situation as Moore. Standard Southwest low-rise. Functional but not spacious. Avoid if room size is your priority.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PIERPONT COMPARATIVE POLITICS -->
+  <div class="rap-card" data-area="southwest" data-gen="sb dg" data-dg="true">
+    <div class="card-head" onclick="toggle(this)">
+      <div class="card-head-left">
+        <span class="hall-name">Pierpont Hall</span>
+        <span class="rap-name">Introduction to Comparative Politics</span>
+        <div class="tags">
+          <span class="tag tag-sw">Southwest</span>
+          <span class="tag tag-gen">SB gen ed</span>
+          <span class="tag tag-gen">DG gen ed</span>
+        </div>
+      </div>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="card-body">
+      <div class="section">
+        <div class="section-title">RAP details</div>
+        <div class="detail-row"><span class="detail-label">Course</span><span class="detail-val">POLISCI 191C — Intro to Comparative Politics (3 credits)</span></div>
+        <div class="detail-row"><span class="detail-label">Open to</span><span class="detail-val">Any first-year</span></div>
+        <div class="detail-row"><span class="detail-label">Roommate</span><span class="detail-val">Not restricted</span></div>
+        <div class="detail-row"><span class="detail-label">Dining</span><span class="detail-val">Berkshire DC close</span></div>
+        <div class="gen-ed-box">
+          <div class="gen-ed-title">Gen Ed satisfied</div>
+          <div class="gen-ed-item">SB — Social & Behavioral Science</div>
+          <div class="gen-ed-item">DG — Global Diversity</div>
+        </div>
+        <div class="verdict">Same as World Politics — SB + DG both covered by ANTHRO 104. Low value for you. Same room situation as above.</div>
+      </div>
+      <div class="section">
+        <div class="section-title">Hall features</div>
+        <ul class="features-list">
+          <li>RFYE low-rise in South-Southwest</li>
+          <li>Clustered with Moore Hall</li>
+          <li>Berkshire DC close</li>
+        </ul>
+      </div>
+      <div class="comfort-section">
+        <div class="section-title">Room comfort</div>
+        <div class="comfort-rating">
+          <span class="comfort-stars">★★★</span>
+          <span class="comfort-label">3 / 5</span>
+        </div>
+        <div class="comfort-note">Same as World Politics RAP — identical building, identical room types (doubles and triples, no Z-rooms, no singles). Standard Southwest low-rise. Not a comfort pick.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- THOREAU ATLANTIC -->
+  <div class="rap-card" data-area="southwest" data-gen="hs" data-hs="true" data-zroom="true">
+    <div class="card-head" onclick="toggle(this)">
+      <div class="card-head-left">
+        <span class="hall-name">Thoreau Hall</span>
+        <span class="rap-name">Atlantic World</span>
+        <div class="tags">
+          <span class="tag tag-sw">Southwest</span>
+          <span class="tag tag-gen">HS gen ed</span>
+          <span class="tag tag-zroom">Z-Rooms available</span>
+        </div>
+      </div>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="card-body">
+      <div class="section">
+        <div class="section-title">RAP details</div>
+        <div class="detail-row"><span class="detail-label">Course</span><span class="detail-val">HIST 151 — The Atlantic World (4 credits)</span></div>
+        <div class="detail-row"><span class="detail-label">Open to</span><span class="detail-val">Any first-year</span></div>
+        <div class="detail-row"><span class="detail-label">Roommate</span><span class="detail-val">Not restricted</span></div>
+        <div class="detail-row"><span class="detail-label">Dining</span><span class="detail-val">Hampshire DC close</span></div>
+        <div class="gen-ed-box">
+          <div class="gen-ed-title">Gen Ed satisfied</div>
+          <div class="gen-ed-item">HS — Historical Studies</div>
+        </div>
+        <div class="verdict">Covers HS which is still open on your ARR. HS only — no diversity tag. Good if you want Southwest + Z-room + still need history.</div>
+      </div>
+      <div class="section">
+        <div class="section-title">Hall features</div>
+        <ul class="features-list">
+          <li>RFYE low-rise in North-Southwest</li>
+          <li>Z-rooms available</li>
+          <li>Clustered with Melville Hall</li>
+          <li>Hampshire DC close</li>
+          <li>Quieter than tower halls</li>
+        </ul>
+      </div>
+      <div class="comfort-section">
+        <div class="section-title">Room comfort</div>
+        <div class="comfort-rating">
+          <span class="comfort-stars">★★★★★</span>
+          <span class="comfort-label">5 / 5</span>
+        </div>
+        <div class="comfort-note">Z-rooms available in a quiet low-rise — same sweet spot as Melville. Spacious, newer building, no radiator/ceiling issues. Singles, doubles, triples, and Z-rooms all available. One of the best comfort options on this list. Quieter than Kennedy tower but same room quality.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- THOREAU LATIN AMERICAN -->
+  <div class="rap-card" data-area="southwest" data-gen="hs dg" data-hs="true" data-dg="true" data-zroom="true">
+    <div class="card-head" onclick="toggle(this)">
+      <div class="card-head-left">
+        <span class="hall-name">Thoreau Hall</span>
+        <span class="rap-name">Latin American Colonial Period</span>
+        <div class="tags">
+          <span class="tag tag-sw">Southwest</span>
+          <span class="tag tag-gen">HS gen ed</span>
+          <span class="tag tag-gen">DG gen ed</span>
+          <span class="tag tag-zroom">Z-Rooms available</span>
+        </div>
+      </div>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="card-body">
+      <div class="section">
+        <div class="section-title">RAP details</div>
+        <div class="detail-row"><span class="detail-label">Course</span><span class="detail-val">HIST 161 — Latin American Colonial Period (4 credits)</span></div>
+        <div class="detail-row"><span class="detail-label">Open to</span><span class="detail-val">Any first-year</span></div>
+        <div class="detail-row"><span class="detail-label">Roommate</span><span class="detail-val">Not restricted</span></div>
+        <div class="detail-row"><span class="detail-label">Dining</span><span class="detail-val">Hampshire DC close</span></div>
+        <div class="gen-ed-box">
+          <div class="gen-ed-title">Gen Ed satisfied</div>
+          <div class="gen-ed-item">HS — Historical Studies</div>
+          <div class="gen-ed-item">DG — Global Diversity (already covered by ANTHRO 104)</div>
+        </div>
+        <div class="verdict">HS + DG — DG is a duplicate but HS is still open. Knocks out history requirement. Same great room situation as Atlantic World.</div>
+      </div>
+      <div class="section">
+        <div class="section-title">Hall features</div>
+        <ul class="features-list">
+          <li>RFYE low-rise in North-Southwest</li>
+          <li>Z-rooms available</li>
+          <li>Clustered with Melville Hall</li>
+          <li>Hampshire DC close</li>
+          <li>Quieter than towers</li>
+        </ul>
+      </div>
+      <div class="comfort-section">
+        <div class="section-title">Room comfort</div>
+        <div class="comfort-rating">
+          <span class="comfort-stars">★★★★★</span>
+          <span class="comfort-label">5 / 5</span>
+        </div>
+        <div class="comfort-note">Same building as Atlantic World RAP — identical room situation. Z-rooms in a quiet low-rise. Best comfort option in Southwest outside Kennedy. Pick this or Atlantic World based purely on which history topic interests you more.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- THOREAU MIDDLE EAST -->
+  <div class="rap-card" data-area="southwest" data-gen="hs dg" data-hs="true" data-dg="true" data-zroom="true">
+    <div class="card-head" onclick="toggle(this)">
+      <div class="card-head-left">
+        <span class="hall-name">Thoreau Hall</span>
+        <span class="rap-name">Middle East History</span>
+        <div class="tags">
+          <span class="tag tag-sw">Southwest</span>
+          <span class="tag tag-gen">HS gen ed</span>
+          <span class="tag tag-gen">DG gen ed</span>
+          <span class="tag tag-zroom">Z-Rooms available</span>
+        </div>
+      </div>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="card-body">
+      <div class="section">
+        <div class="section-title">RAP details</div>
+        <div class="detail-row"><span class="detail-label">Course</span><span class="detail-val">HIST 130 — Middle East History (4 credits)</span></div>
+        <div class="detail-row"><span class="detail-label">Open to</span><span class="detail-val">Any first-year</span></div>
+        <div class="detail-row"><span class="detail-label">Roommate</span><span class="detail-val">Not restricted</span></div>
+        <div class="detail-row"><span class="detail-label">Dining</span><span class="detail-val">Hampshire DC close</span></div>
+        <div class="gen-ed-box">
+          <div class="gen-ed-title">Gen Ed satisfied</div>
+          <div class="gen-ed-item">HS — Historical Studies</div>
+          <div class="gen-ed-item">DG — Global Diversity (already covered by ANTHRO 104)</div>
+        </div>
+        <div class="verdict">Same as Latin American Colonial Period — HS + DG with DG already covered. Great room comfort. Choose between this and HIST 161 based purely on interest.</div>
+      </div>
+      <div class="section">
+        <div class="section-title">Hall features</div>
+        <ul class="features-list">
+          <li>RFYE low-rise in North-Southwest</li>
+          <li>Z-rooms available</li>
+          <li>Clustered with Melville Hall</li>
+          <li>Hampshire DC close</li>
+          <li>Quieter than towers</li>
+        </ul>
+      </div>
+      <div class="comfort-section">
+        <div class="section-title">Room comfort</div>
+        <div class="comfort-rating">
+          <span class="comfort-stars">★★★★★</span>
+          <span class="comfort-label">5 / 5</span>
+        </div>
+        <div class="comfort-note">Identical to other Thoreau RAPs — same Z-room availability, same quiet low-rise building, same comfort rating. One of the top comfort picks on this entire list.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- JAMES IMPACT -->
+  <div class="rap-card" data-area="southwest" data-gen="unknown" data-zroom="true">
+    <div class="card-head" onclick="toggle(this)">
+      <div class="card-head-left">
+        <span class="hall-name">James Hall</span>
+        <span class="rap-name">IMPACT</span>
+        <div class="tags">
+          <span class="tag tag-sw">Southwest</span>
+          <span class="tag tag-gen">Unknown gen ed — check SPIRE</span>
+          <span class="tag tag-zroom">Z-Rooms available</span>
+        </div>
+      </div>
+      <span class="chevron">▼</span>
+    </div>
+    <div class="card-body">
+      <div class="section">
+        <div class="section-title">RAP details</div>
+        <div class="detail-row"><span class="detail-label">Course</span><span class="detail-val">Unknown — verify on SPIRE</span></div>
+        <div class="detail-row"><span class="detail-label">Open to</span><span class="detail-val">Any first-year</span></div>
+        <div class="detail-row"><span class="detail-label">Roommate</span><span class="detail-val">Not restricted</span></div>
+        <div class="detail-row"><span class="detail-label">Dining</span><span class="detail-val">Hampshire DC very close</span></div>
+        <div class="gen-ed-box">
+          <div class="gen-ed-title">Gen Ed satisfied</div>
+          <div class="gen-ed-item">Unknown — check SPIRE for this RAP's course</div>
+        </div>
+        <div class="verdict">Can't assess gen ed value without knowing the course. Look it up on SPIRE. Room comfort is excellent regardless.</div>
+      </div>
+      <div class="section">
+        <div class="section-title">Hall features</div>
+        <ul class="features-list">
+          <li>RFYE low-rise in North-Southwest</li>
+          <li>Z-rooms available</li>
+          <li>Optional break housing — can stay over holidays</li>
+          <li>Hampshire DC very close</li>
+          <li>Same cluster as Emerson, Kennedy, Thoreau</li>
+        </ul>
+      </div>
+      <div class="comfort-section">
+        <div class="section-title">Room comfort</div>
+        <div class="comfort-rating">
+          <span class="comfort-stars">★★★★½</span>
+          <span class="comfort-label">4.5 / 5</span>
+        </div>
+        <div class="comfort-note">Z-rooms available — same large room benefit as rest of North-SW cluster. Low-rise so quieter than Kennedy tower. Optional break housing is a practical bonus if you're staying over Thanksgiving or winter break. Solid room comfort pick.</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<script>
+function toggle(head) {
+  const body = head.nextElementSibling;
+  const ch = head.querySelector('.chevron');
+  if (body.classList.contains('open')) { body.classList.remove('open'); ch.classList.remove('open'); }
+  else { body.classList.add('open'); ch.classList.add('open'); }
+}
+function toggleTable(head) {
+  const body = head.nextElementSibling;
+  const ch = head.querySelector('.chevron');
+  if (body.classList.contains('open')) { body.classList.remove('open'); ch.classList.remove('open'); }
+  else { body.classList.add('open'); ch.classList.add('open'); }
+}
+function filter(type, btn) {
+  document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.rap-card').forEach(card => {
+    const area = card.dataset.area;
+    const gen = card.dataset.gen || '';
+    const isCics = card.dataset.cics === 'true';
+    const hasZroom = card.dataset.zroom === 'true';
+    let show = true;
+    if (type === 'northeast') show = area === 'northeast';
+    else if (type === 'southwest') show = area === 'southwest';
+    else if (type === 'cics') show = isCics;
+    else if (type === 'du') show = gen.includes('du');
+    else if (type === 'dg') show = gen.includes('dg');
+    else if (type === 'hs') show = gen.includes('hs');
+    else if (type === 'zroom') show = hasZroom;
+    card.classList.toggle('hidden', !show);
+  });
+}
+</script>
+</body>
+</html>
